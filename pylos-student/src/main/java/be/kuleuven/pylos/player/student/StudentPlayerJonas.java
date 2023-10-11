@@ -142,66 +142,57 @@ class StudentPlayerGameSimulator extends PylosGameSimulator {
 }
 
 class BoardEvaluator {
+    private static final int OWN_WEIGHT = 1;
+    private static final int OTHER_WEIGHT = 2;
     // evaluateReserveSpheres
-    private static final int OWN_RESERVE_SPHERE_WEIGHT = 1;
-    private static final int OTHER_RESERVE_SPHERE_WEIGHT = 2;
-    private static final int RESERVE_SPHERE_WEIGHT = 5;
+    private static final int RESERVE_SPHERE_WEIGHT = 10;
 
     // evaluateSquares
-    private static final int FULL_SQUARE_BONUS = 2;
+    private static final int FULL_SQUARE_BONUS = 3;
     private static final int ALMOST_FULL_SQUARE_BONUS = 1;
-    private static final int BLOCK_OTHER_SQUARE_BONUS = 1;
-    private static final int OWN_SQUARE_WEIGHT = 1;
-    private static final int OTHER_SQUARE_WEIGHT = 2;
-    private static final int SQUARE_WEIGHT = 10;
-
-    // evaluateHeight
-    /*
-    If you play a sphere on level 0 you block 0 other spheres => Weight = 0
-    If you play a sphere on level 1 you block 4 other spheres => Weight = 4
-    ...
-     */
-    private static final int[] HEIGHT_WEIGHTS = {0, 4, 13, 29};
+    private static final int BLOCK_OTHER_SQUARE_BONUS = 2;
+    private static final int SQUARE_WEIGHT = 5;
 
     public int evaluateBoard(PylosBoard board, PylosPlayerColor playerColor) {
-        return this.evaluateReserveSpheres(board, playerColor) +
-                this.evaluateSquares(board, playerColor) +
-                this.evaluateHeight(board, playerColor);
+        return (
+                this.evaluateReserveSpheres(board, playerColor) +
+                this.evaluateSquares(board, playerColor)
+                );
     }
 
     private int evaluateReserveSpheres(PylosBoard board, PylosPlayerColor playerColor) {
         return (
-                board.getReservesSize(playerColor) * OWN_RESERVE_SPHERE_WEIGHT -
-                board.getReservesSize(playerColor.other()) * OTHER_RESERVE_SPHERE_WEIGHT
+                board.getReservesSize(playerColor) * OWN_WEIGHT -
+                board.getReservesSize(playerColor.other()) * OTHER_WEIGHT
                 ) * RESERVE_SPHERE_WEIGHT;
     }
 
     private int evaluateSquares(PylosBoard board, PylosPlayerColor playerColor) {
         int own_score = 0;
         int other_score = 0;
+        int own_spheres;
+        int other_spheres;
+
         for (PylosSquare square : board.getAllSquares()) {
+            own_spheres = square.getInSquare(playerColor);
+            other_spheres = square.getInSquare(playerColor.other());
+
             // Nice, you made a full square!
-            if (square.getInSquare(playerColor) == 4) own_score += FULL_SQUARE_BONUS;
-            else if (square.getInSquare(playerColor.other()) == 4) other_score += FULL_SQUARE_BONUS;
+            if (own_spheres == 4) own_score += FULL_SQUARE_BONUS;
+            else if (other_spheres == 4) other_score += FULL_SQUARE_BONUS;
 
             // Nice, you almost made a full square!
-            else if (square.getInSquare(playerColor) == 3 && square.getInSquare(playerColor.other()) == 0) own_score += ALMOST_FULL_SQUARE_BONUS;
-            else if (square.getInSquare(playerColor.other()) == 3 && square.getInSquare(playerColor) == 0) other_score += ALMOST_FULL_SQUARE_BONUS;
+            else if (own_spheres == 3 && other_spheres == 0) own_score += ALMOST_FULL_SQUARE_BONUS;
+            else if (other_spheres == 3 && own_spheres == 0) other_score += ALMOST_FULL_SQUARE_BONUS;
 
             // Nice, you blocked a square of your opponent!
-            else if (square.getInSquare(playerColor) == 1 && square.getInSquare(playerColor.other()) == 3)  own_score += BLOCK_OTHER_SQUARE_BONUS;
-            else if (square.getInSquare(playerColor.other()) == 1 && square.getInSquare(playerColor) == 3) other_score =+ BLOCK_OTHER_SQUARE_BONUS;
-
+            else if (own_spheres == 1 && other_spheres == 3) own_score += BLOCK_OTHER_SQUARE_BONUS;
+            else if (other_spheres == 1 && own_spheres == 3) other_score += BLOCK_OTHER_SQUARE_BONUS;
         }
         return (
-                own_score * OWN_SQUARE_WEIGHT -
-                other_score * OTHER_SQUARE_WEIGHT
+                own_score * OWN_WEIGHT -
+                other_score * OTHER_WEIGHT
                 ) * SQUARE_WEIGHT;
-    }
-
-    private int evaluateHeight(PylosBoard board, PylosPlayerColor playerColor) {
-        // TODO
-        return 0;
     }
 }
 
