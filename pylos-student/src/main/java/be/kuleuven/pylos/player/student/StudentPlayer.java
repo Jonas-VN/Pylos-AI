@@ -9,156 +9,200 @@ import java.util.ArrayList;
  * Created by Jan on 20/02/2015.
  */
 public class StudentPlayer extends PylosPlayer {
-	int maxdepth = 3;
-	PylosGameSimulator simulator;
+	private static final int MAX_DEPTH = 6;
 
-	@Override
-	public void doMove(PylosGameIF game, PylosBoard board) {
-		int maxEval = Integer.MIN_VALUE;
-		PylosSphere bestSphere = null;
-		PylosLocation bestLocation = null;
-		int depth = 3;  // Define a suitable depth for your game
-
-		// Create a simulator
-		simulator = new PylosGameSimulator(game.getState(), this.PLAYER_COLOR, board);
-
-		// Iterate over all spheres and locations to find the best move
-		for (PylosSphere sphere : board.getSpheres()) {
-			for (PylosLocation location : board.getLocations()) {
-				// Check if the move is legal
-				if (location.isUsable() && location.hasAbove()) {
-					// S	imulate the move
-					simulator.moveSphere(sphere, location);
-
-					// Evaluate the board state
-					int eval = minimax(board, depth - 1, this.PLAYER_COLOR, game, simulator.getState(), Integer.MIN_VALUE, Integer.MAX_VALUE);
-
-					// Undo the move
-					simulator.undoMoveSphere(sphere, location, game.getState(), this.PLAYER_COLOR);
-
-					// Update maxEval and bestMove if this move is better
-					if (eval > maxEval) {
-						maxEval = eval;
-						bestSphere = sphere;
-						bestLocation = location;
-					}
-				}
-			}
-		}
-
-		// Perform the best move found
-		if (bestSphere != null && bestLocation != null) {
-			game.moveSphere(bestSphere, bestLocation);
-		}
-	}
 	@Override
 	public void doRemove(PylosGameIF game, PylosBoard board) {
-		int maxEval = Integer.MIN_VALUE;
-		PylosSphere bestSphere = null;
-		int depth = 3;  // Define a suitable depth for your game
-
-		// Iterate over all spheres to find the best one to remove
-		for (PylosSphere sphere : board.getSpheres()) {
-			// Check if the sphere can be removed
-			if (sphere.canRemove()) {
-				// Simulate the removal
-				game.removeSphere(sphere);
-
-				// Evaluate the board state
-				int eval = minimax(board, depth - 1, this.PLAYER_COLOR, game, game.getState(), Integer.MIN_VALUE, Integer.MAX_VALUE);
-
-				// Undo the removal
-				game.removeSphereIsDraw(sphere);
-
-				// Update maxEval and bestSphere if this removal is better
-				if (eval > maxEval) {
-					maxEval = eval;
-					bestSphere = sphere;
-				}
-			}
-		}
-
-		// Perform the best removal found
-		if (bestSphere != null) {
-			game.removeSphere(bestSphere);
-		}
+		Action bestAction = findBestAction(game, board);
+		game.removeSphere(bestAction.pylosSphere);
 	}
 
 	@Override
 	public void doRemoveOrPass(PylosGameIF game, PylosBoard board) {
-		int depth = 3;
-		int maxEvalWithoutRemoval = minimax(board, depth - 1, this.PLAYER_COLOR, game, game.getState(), Integer.MIN_VALUE, Integer.MAX_VALUE);
-
-		int maxEvalWithRemoval = Integer.MIN_VALUE;
-		PylosSphere bestSphere = null;
-		  // Define a suitable depth for your game
-
-		// Iterate over all spheres to find the best one to remove
-		for (PylosSphere sphere : board.getSpheres()) {
-			// Check if the sphere can be removed
-			if (sphere.canRemove()) {
-				// Simulate the removal
-				game.removeSphere(sphere);
-
-				// Evaluate the board state
-				int eval = minimax(board, depth - 1, this.PLAYER_COLOR, game, game.getState(), Integer.MIN_VALUE, Integer.MAX_VALUE);
-
-				// Undo the removal
-				game.removeSphereIsDraw(sphere);
-
-				// Update maxEvalWithRemoval and bestSphere if this removal is better
-				if (eval > maxEvalWithRemoval) {
-					maxEvalWithRemoval = eval;
-					bestSphere = sphere;
-				}
-			}
-		}
-
-		// Decide whether to remove a sphere or pass based on which option has a higher evaluation
-		if (maxEvalWithRemoval > maxEvalWithoutRemoval && bestSphere != null) {
-			game.removeSphere(bestSphere);
-		} else {
+		Action bestAction = findBestAction(game, board);
+		if (bestAction.pass) {
 			game.pass();
+		} else {
+			game.removeSphere(bestAction.pylosSphere);
 		}
 	}
-	private int minimax(PylosBoard board, int depth, PylosPlayerColor color, PylosGameIF game, PylosGameState state, int alpha, int beta) {
-		if (depth == 0 || state == PylosGameState.COMPLETED) {
-			return board.getReserve(this).getLocation().getMaxInSquare(this);
+
+	@Override
+	public void doMove(PylosGameIF game, PylosBoard board) {
+		Action bestAction = findBestAction(game, board);
+		game.moveSphere(bestAction.pylosSphere, bestAction.location);
+	}
+
+	private Action findBestAction(PylosGameIF game, PylosBoard board) {
+		Action bestAction = null;
+		int bestScore = Integer.MIN_VALUE;
+		int alpha = Integer.MIN_VALUE;
+		int beta = Integer.MAX_VALUE;
+
+		PylosGameSimulator simulator = new PylosGameSimulator(game.getState(), this.PLAYER_COLOR, board);
+		ArrayList<Action> possibleActions = generatePossibleActions(board, simulator);
+
+		for (Action action : possibleActions) {
+			int score = -minimax(simulator, board, StudentPlayer.MAX_DEPTH - 1, alpha, beta, this.PLAYER_COLOR.other());
+			if (score > bestScore) {
+				bestScore = score;
+				bestAction = action;
+			}
+			if (beta <= alpha) {
+				break;
+			}
 		}
 
-		if (color == this.PLAYER_COLOR) {	// my turn
-			int maxEval = Integer.MIN_VALUE;
-			for (PylosLocation location : board.getLocations()) {
-				if (location.isUsable() && location.hasAbove()) {
-					simulator.moveSphere(board.getReserve(this), location);
-					int eval = minimax(board, depth - 1, color, game, state, alpha, beta);
-					simulator.undoMoveSphere(board.getReserve(this), location, state, color);
-					maxEval = Math.max(maxEval, eval);
-					alpha = Math.max(alpha, eval);
-					if (beta <= alpha) {
-						break;  // beta cut-off
-					}
-				}
+		return bestAction;
+	}
+
+	private int minimax(PylosGameSimulator simulator, PylosBoard board, int depth, int alpha, int beta, PylosPlayerColor playerColor) {
+		if (depth == 0 || simulator.getState().equals(PylosGameState.COMPLETED) || simulator.getState().equals(PylosGameState.DRAW)) {
+			return evaluate(board, playerColor);
+		}
+
+		int bestScore = (playerColor == this.PLAYER_COLOR) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+
+		ArrayList<Action> possibleActions = generatePossibleActions(board, simulator);
+
+		for (Action action : possibleActions) {
+			int score = -minimax(simulator, board, depth - 1, alpha, beta, playerColor.other());
+			if (playerColor == this.PLAYER_COLOR) {
+				bestScore = Math.max(bestScore, score);
+				alpha = Math.max(alpha, bestScore);
+			} else {
+				bestScore = Math.min(bestScore, score);
+				beta = Math.min(beta, bestScore);
 			}
-			return maxEval;
+			if (beta <= alpha) {
+				return bestScore;
+			}
+		}
+
+		return bestScore;
+	}
+
+	public ArrayList<Action> generatePossibleActions(PylosBoard board, PylosGameSimulator simulator) {
+		ArrayList<Action> possibleActions = new ArrayList<>();
+		PylosGameState state = simulator.getState();
+		PylosPlayerColor color = simulator.getColor();
+
+		if(state == PylosGameState.MOVE) {
+			generateMoveActions(board, simulator, possibleActions, state, color);
+		} else if(state == PylosGameState.REMOVE_FIRST) {
+			generateRemoveActions(board, possibleActions, state, color);
 		} else {
-			int minEval = Integer.MAX_VALUE;
-			for (PylosLocation location : board.getLocations()) {
-				if (location.isUsable() && location.hasAbove()) {
-					simulator.moveSphere(board.getReserve(this), location);
-					int eval = minimax(board, depth - 1, color, game, state, alpha, beta);	// opponent's turn
-					simulator.undoMoveSphere(board.getReserve(this), location, state, color);
-					minEval = Math.min(minEval, eval);
-					beta = Math.min(beta, eval);
-					if (beta <= alpha) {
-						break;  // alpha cut-off
-					}
-				}
+			generatePassOrRemoveActions(board, possibleActions, state, color);
+		}
+
+		assert !possibleActions.isEmpty() : "No possible actions found";
+		return possibleActions;
+	}
+
+	private void generateMoveActions(PylosBoard board, PylosGameSimulator simulator, ArrayList<Action> possibleActions,
+									 PylosGameState state, PylosPlayerColor color) {
+		PylosSphere reserveSphere = board.getReserve(color);
+		for (PylosLocation location : board.getLocations()) {
+			// Move a sphere from the reserve to an available spot
+			if (location.isUsable()) possibleActions.add(new Action(reserveSphere, location, state, color));
+			// Move a sphere on the board to a higher location
+			for (PylosSphere sphere : board.getSpheres(color)) {
+				if(sphere.canMoveTo(location) && !sphere.isReserve()) possibleActions.add(new Action(sphere, location, state, color));
 			}
-			return minEval;
+		}
+	}
+
+	private void generateRemoveActions(PylosBoard board, ArrayList<Action> possibleActions,
+									   PylosGameState state, PylosPlayerColor color) {
+		// remove a sphere in a square
+		for(PylosSphere sphere : board.getSpheres(color)){
+			if(sphere.canRemove()) possibleActions.add(new Action(sphere, sphere.getLocation(), state, color));
+		}
+	}
+
+	private void generatePassOrRemoveActions(PylosBoard board, ArrayList<Action> possibleActions,
+											 PylosGameState state, PylosPlayerColor color) {
+		// Pass
+		possibleActions.add(new Action(true));
+		// remove a sphere in a square
+		for(PylosSphere sphere : board.getSpheres(color)){
+			if(sphere.canRemove()) possibleActions.add(new Action(sphere, state, color));
+		}
+	}
+
+	private int evaluate(PylosBoard board, PylosPlayerColor playerColor) {
+		int reservesScore = board.getReservesSize(this.PLAYER_COLOR) - board.getReservesSize(playerColor.other());
+		int squaresScorePlayer = countSquares(playerColor, board);
+		int squaresScoreOpponent = countSquares(playerColor.other(), board);
+		int squaresScore = squaresScorePlayer - squaresScoreOpponent;
+		int centerScorePlayer = countCenters(playerColor, board);
+		int centerScoreOpponent = countCenters(playerColor.other(), board);
+		int centerScore = centerScorePlayer - centerScoreOpponent;
+
+		return reservesScore + squaresScore + centerScore;
+	}
+
+	private int countSquares(PylosPlayerColor playerColor, PylosBoard board) {
+		int count = 0;
+		for (PylosSquare square : board.getAllSquares()) {
+			if (square.isSquare(playerColor)) {
+				count++;
+			}
+		}
+		return count;
+	}
+
+	private int countCenters(PylosPlayerColor playerColor, PylosBoard board) {
+		int count = 0;
+		for (PylosSphere sphere : board.getSpheres(playerColor)) {
+			if (isCentered(sphere, board)) {
+				count++;
+			}
+		}
+		return count;
+	}
+
+	private boolean isCentered(PylosSphere sphere, PylosBoard board) {
+		if (!sphere.isReserve()) {
+			PylosLocation location = sphere.getLocation();
+			int x = location.X;
+			int y = location.Y;
+			int size = board.SIZE;
+			return x > 0 && x < size - 1 && y > 0 && y < size - 1;
+		}
+		return false;
+	}
+
+	private static class Action {
+		PylosSphere pylosSphere;
+		PylosLocation location;
+		boolean pass;
+		PylosGameState state;
+		PylosPlayerColor color;
+
+		public Action(PylosSphere pylosSphere, PylosGameState state, PylosPlayerColor color) {
+			this.pylosSphere = pylosSphere;
+			this.state = state;
+			this.color = color;
+		}
+		public Action(PylosSphere pylosSphere, PylosLocation location, PylosGameState state, PylosPlayerColor color) {
+			this.pylosSphere = pylosSphere;
+			this.location = location;
+			this.state = state;
+			this.color = color;
+		}
+
+		Action(boolean pass) {
+			this.pass = pass;
 		}
 	}
 }
+
+
+
+
+
+
 
 
 
