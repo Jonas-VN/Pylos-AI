@@ -41,9 +41,7 @@ public class StudentPlayerJonas extends PylosPlayer {
         }
     }
 
-    // TODO: switch to one method with a boolean parameter
     private Move minimax(PylosGameState gameState, PylosBoard board, Move latestMove, PylosPlayerColor playerColor, int depth, int alpha, int beta) {
-//        System.out.println("Minimax called with depth " + depth);
         if (depth == 0 || gameState == PylosGameState.COMPLETED) {
             latestMove.setEvaluationScore(evaluator.evaluateBoard(board, this.PLAYER_COLOR));
             return latestMove;
@@ -56,7 +54,6 @@ public class StudentPlayerJonas extends PylosPlayer {
 
         if (playerColor == this.PLAYER_COLOR) {
             // Maximize
-//            System.out.println("Maximize");
             bestEvaluationScore = Integer.MIN_VALUE;
 
             for (final Move move : latestMove.getChildren()) {
@@ -87,7 +84,6 @@ public class StudentPlayerJonas extends PylosPlayer {
         }
         else {
             // Minimize
-//            System.out.println("Minimize");
             bestEvaluationScore = Integer.MAX_VALUE;
 
             for (final Move move : latestMove.getChildren()) {
@@ -119,87 +115,6 @@ public class StudentPlayerJonas extends PylosPlayer {
         }
         return nextBestMove;
     }
-
-    /*private Move max(PylosGameState gameState, PylosBoard board, Move latestMove, int depth, int alpha, int beta) {
-        if (depth == 0 || gameState == PylosGameState.COMPLETED) {
-            latestMove.setEvaluationScore(evaluator.evaluateBoard(board, this.PLAYER_COLOR));
-            return latestMove;
-        }
-
-        StudentPlayerGameSimulator simulator = new StudentPlayerGameSimulator(gameState, this.PLAYER_COLOR, board);
-        latestMove.generateAllLegalMoves(gameState, this.PLAYER_COLOR, board);
-
-        int bestEvaluationScore = Integer.MIN_VALUE;
-        Move nextBestMove = null;
-
-        for (final Move move : latestMove.getChildren()) {
-            simulator.doMove(move);
-
-            Move bestNextMove = min(simulator.getState(), board, move, depth - 1, alpha, beta);
-
-            // Beta cut-off
-            if (bestNextMove.getEvaluationScore() < beta) {
-                latestMove.setEvaluationScore(beta);
-                simulator.undoMove(latestMove);
-                return latestMove;
-            }
-
-            alpha = Math.max(alpha, bestNextMove.getEvaluationScore());
-            if (beta <= alpha) {
-                latestMove.setEvaluationScore(bestNextMove.getEvaluationScore());
-                simulator.undoMove(latestMove);
-                return latestMove;
-            }
-
-            if (bestEvaluationScore < bestNextMove.getEvaluationScore()) {
-                bestEvaluationScore = bestNextMove.getEvaluationScore();
-                nextBestMove = move;
-            }
-            simulator.undoMove(latestMove);
-        }
-        return nextBestMove;
-    }*/
-
-    /*private Move min(PylosGameState gameState, PylosBoard board, Move latestMove, int depth, int alpha, int beta) {
-        if (depth == 0 || gameState == PylosGameState.COMPLETED) {
-            latestMove.setEvaluationScore(evaluator.evaluateBoard(board, this.PLAYER_COLOR.other()));
-            return latestMove;
-        }
-
-        StudentPlayerGameSimulator simulator = new StudentPlayerGameSimulator(gameState, this.PLAYER_COLOR.other(), board);
-        latestMove.generateAllLegalMoves(gameState, this.PLAYER_COLOR.other(), board);
-
-        int bestEvaluationScore = Integer.MAX_VALUE;
-        Move nextBestMove = null;
-
-        for (final Move move : latestMove.getChildren()) {
-            simulator.doMove(move);
-
-            Move bestNextMove = max(simulator.getState(), board, move, depth - 1, alpha, beta);
-
-            // Alpha cut-off
-            if (bestNextMove.getEvaluationScore() < alpha) {
-                latestMove.setEvaluationScore(alpha);
-                simulator.undoMove(latestMove);
-                return latestMove;
-            }
-
-            beta = Math.min(beta, bestNextMove.getEvaluationScore());
-            if (beta <= alpha) {
-                latestMove.setEvaluationScore(bestNextMove.getEvaluationScore());
-                simulator.undoMove(latestMove);
-                return latestMove;
-            }
-
-            if (bestEvaluationScore > bestNextMove.getEvaluationScore()) {
-                bestEvaluationScore = bestNextMove.getEvaluationScore();
-                nextBestMove = move;
-            }
-            simulator.undoMove(latestMove);
-        }
-        return nextBestMove;
-    }*/
-
 }
 
 class StudentPlayerGameSimulator extends PylosGameSimulator {
