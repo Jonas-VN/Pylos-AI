@@ -6,13 +6,21 @@ import be.kuleuven.pylos.player.PylosPlayer;
 import java.util.ArrayList;
 
 public class StudentPlayerJonas extends PylosPlayer {
-    final int MAX_DEPTH = 8;
+    final int MAX_DEPTH = 9;
     BoardEvaluator evaluator = new BoardEvaluator();
+    boolean isFirstMove = true;
 
     @Override
     public void doMove(PylosGameIF game, PylosBoard board) {
-        Move firstMove = new Move();
-        Move bestMove = minimax(game.getState(), board, firstMove, this.PLAYER_COLOR, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        Move bestMove;
+        if (isFirstMove) {
+            bestMove = doFirstMove(game, board);
+            isFirstMove = false;
+        }
+        else {
+            Move firstMove = new Move();
+            bestMove = minimax(game.getState(), board, firstMove, this.PLAYER_COLOR, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        }
 
         PylosSphere bestSphere = bestMove.getSphere();
         PylosLocation bestLocation = bestMove.getEndLocation();
@@ -39,6 +47,24 @@ public class StudentPlayerJonas extends PylosPlayer {
             PylosSphere bestSphere = bestMove.getSphere();
             game.removeSphere(bestSphere);
         }
+    }
+
+    private Move doFirstMove(PylosGameIF game, PylosBoard board) {
+        final int z = 0;
+        final int[] Y = {1, 2};
+        final int[] X = {1, 2};
+
+        for (final int x : X) {
+            for (final int y :Y) {
+                PylosLocation location = board.getBoardLocation(x, y, z);
+                PylosSphere sphere = board.getReserve(this.PLAYER_COLOR);
+                if (sphere.canMoveTo(location)) {
+                    return new Move(MoveType.ADD, sphere, sphere.getLocation(), location, this.PLAYER_COLOR);
+                };
+
+            }
+        }
+        return null;
     }
 
     private Move minimax(PylosGameState gameState, PylosBoard board, Move latestMove, PylosPlayerColor playerColor, int depth, int alpha, int beta) {
@@ -144,6 +170,7 @@ class StudentPlayerGameSimulator extends PylosGameSimulator {
 class BoardEvaluator {
     private static final int OWN_WEIGHT = 1;
     private static final int OTHER_WEIGHT = 2;
+
     // evaluateReserveSpheres
     private static final int RESERVE_SPHERE_WEIGHT = 10;
 

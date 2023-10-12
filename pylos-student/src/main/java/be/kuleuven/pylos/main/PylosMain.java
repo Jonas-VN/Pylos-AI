@@ -56,10 +56,10 @@ public class PylosMain {
             }
         };
 
-        PylosPlayerType p2 = new PylosPlayerType("Minimax 4") {
+        PylosPlayerType p2 = new PylosPlayerType("Minimax 10") {
             @Override
             public PylosPlayer create() {
-                return new PylosPlayerMiniMax(4);
+                return new PylosPlayerMiniMax(10);
             }
         };
 
@@ -71,7 +71,7 @@ public class PylosMain {
         //as this is not ideal for use across multiple threads.
         //Use Collections.shuffle(List<?> list, Random random) instead, with the Random object from the player (PylosPlayer.getRandom())
 
-        int nRuns = 1000;
+        int nRuns = 100;
         int nThreads = 6;
 
         PylosPlayerType p1 = new PylosPlayerType("Jonas") {
