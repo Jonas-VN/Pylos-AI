@@ -6,7 +6,7 @@ import be.kuleuven.pylos.player.PylosPlayer;
 import java.util.ArrayList;
 
 public class StudentPlayerJonas extends PylosPlayer {
-    final int MAX_DEPTH = 7;
+    final int MAX_DEPTH = 8;
     BoardEvaluator evaluator = new BoardEvaluator();
 
     @Override

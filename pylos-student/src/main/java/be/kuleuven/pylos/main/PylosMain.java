@@ -16,6 +16,7 @@ import be.kuleuven.pylos.player.codes.PylosPlayerMiniMax;
 import be.kuleuven.pylos.player.codes.PylosPlayerRandomFit;
 import be.kuleuven.pylos.player.student.StudentPlayer;
 import be.kuleuven.pylos.player.student.StudentPlayerJonas;
+import be.kuleuven.pylos.player.student.StudentPlayerRandomFit;
 
 import java.util.List;
 import java.util.Random;
@@ -47,7 +48,7 @@ public class PylosMain {
     }
 
     public static void startBattle() {
-        int nRuns = 500;
+        int nRuns = 100;
         PylosPlayerType p1 = new PylosPlayerType("Jonas") {
             @Override
             public PylosPlayer create() {
@@ -55,10 +56,10 @@ public class PylosMain {
             }
         };
 
-        PylosPlayerType p2 = new PylosPlayerType("CODES") {
+        PylosPlayerType p2 = new PylosPlayerType("Minimax 4") {
             @Override
             public PylosPlayer create() {
-                return new PylosPlayerMiniMax(7);
+                return new PylosPlayerMiniMax(4);
             }
         };
 
@@ -70,8 +71,8 @@ public class PylosMain {
         //as this is not ideal for use across multiple threads.
         //Use Collections.shuffle(List<?> list, Random random) instead, with the Random object from the player (PylosPlayer.getRandom())
 
-        int nRuns = 20;
-        int nThreads = 4;
+        int nRuns = 1000;
+        int nThreads = 6;
 
         PylosPlayerType p1 = new PylosPlayerType("Jonas") {
             @Override
@@ -79,10 +80,10 @@ public class PylosMain {
                 return new StudentPlayerJonas();
             }
         };
-        PylosPlayerType p2 = new PylosPlayerType("CODES - 15") {
+        PylosPlayerType p2 = new PylosPlayerType("CODES - 4") {
             @Override
             public PylosPlayer create() {
-                return new PylosPlayerMiniMax(15);
+                return new PylosPlayerMiniMax(4);
             }
         };
 
