@@ -17,7 +17,7 @@ public class PlayerFactoryStudent extends PylosPlayerFactory {
     protected void createTypes() {
 
         /* example */
-        add(new PylosPlayerType("Student") {
+        add(new PylosPlayerType("Gil") {
             @Override
             public PylosPlayer create() {
                 return new StudentPlayer();
@@ -30,9 +30,18 @@ public class PlayerFactoryStudent extends PylosPlayerFactory {
                 return new StudentPlayerRandomFit();
             }
         });
+<<<<<<< HEAD
         add(new PylosPlayerType("officialbot") {
             @Override
             public PylosPlayer create(){return new StudentPlayerOfficial();}
+=======
+
+        add(new PylosPlayerType("Jonas") {
+            @Override
+            public PylosPlayer create() {
+                return new StudentPlayerJonas();
+            }
+>>>>>>> 38797ef6f776f899ba8058df8ab8d4af94bfc880
         });
     }
 }

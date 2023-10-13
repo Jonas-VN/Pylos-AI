@@ -13,7 +13,14 @@ import be.kuleuven.pylos.player.PylosPlayerType;
 import be.kuleuven.pylos.player.codes.PlayerFactoryCodes;
 import be.kuleuven.pylos.player.codes.PylosPlayerBestFit;
 import be.kuleuven.pylos.player.codes.PylosPlayerMiniMax;
+<<<<<<< HEAD
 import be.kuleuven.pylos.player.student.StudentPlayerOfficial;
+=======
+import be.kuleuven.pylos.player.codes.PylosPlayerRandomFit;
+import be.kuleuven.pylos.player.student.StudentPlayer;
+import be.kuleuven.pylos.player.student.StudentPlayerJonas;
+import be.kuleuven.pylos.player.student.StudentPlayerRandomFit;
+>>>>>>> 38797ef6f776f899ba8058df8ab8d4af94bfc880
 
 import java.util.List;
 import java.util.Random;
@@ -26,8 +33,13 @@ public class PylosMain {
         /* !!! jvm argument !!! -ea */
 
         //startSingleGame();
+<<<<<<< HEAD
         startBattle();
         //startBattleMultithreaded();
+=======
+        //startBattle();
+        startBattleMultithreaded();
+>>>>>>> 38797ef6f776f899ba8058df8ab8d4af94bfc880
         //startRoundRobinTournament();
     }
 
@@ -45,6 +57,7 @@ public class PylosMain {
     }
 
     public static void startBattle() {
+<<<<<<< HEAD
         int nRuns = 300;
         PylosPlayerType p1 = new PylosPlayerType("BestFit") {
             @Override
@@ -57,6 +70,20 @@ public class PylosMain {
             @Override
             public PylosPlayer create() {
                 return new StudentPlayerOfficial();
+=======
+        int nRuns = 100;
+        PylosPlayerType p1 = new PylosPlayerType("Jonas") {
+            @Override
+            public PylosPlayer create() {
+                return new StudentPlayerJonas();
+            }
+        };
+
+        PylosPlayerType p2 = new PylosPlayerType("Minimax 10") {
+            @Override
+            public PylosPlayer create() {
+                return new PylosPlayerMiniMax(10);
+>>>>>>> 38797ef6f776f899ba8058df8ab8d4af94bfc880
             }
         };
 
@@ -68,23 +95,24 @@ public class PylosMain {
         //as this is not ideal for use across multiple threads.
         //Use Collections.shuffle(List<?> list, Random random) instead, with the Random object from the player (PylosPlayer.getRandom())
 
-        int nRuns = 1000;
-        int nThreads = 8;
+        int nRuns = 100;
+        int nThreads = 6;
 
-        PylosPlayerType p1 = new PylosPlayerType("BestFit") {
+        PylosPlayerType p1 = new PylosPlayerType("Jonas") {
             @Override
             public PylosPlayer create() {
-                return new PylosPlayerBestFit();
+                return new StudentPlayerJonas();
             }
         };
-        PylosPlayerType p2 = new PylosPlayerType("Minimax2") {
+        PylosPlayerType p2 = new PylosPlayerType("CODES - 4") {
             @Override
             public PylosPlayer create() {
-                return new PylosPlayerMiniMax(2);
+                return new PylosPlayerMiniMax(4);
             }
         };
 
-        BattleMT.play(p2, p2, nRuns, nThreads);
+        System.out.println("Starting battle between " + p1 + " and " + p2 + " with " + nRuns + " runs and " + nThreads + " threads.");
+        BattleMT.play(p1, p2, nRuns, nThreads);
     }
 
     public static void startRoundRobinTournament() {
