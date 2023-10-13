@@ -30,5 +30,9 @@ public class PlayerFactoryStudent extends PylosPlayerFactory {
                 return new StudentPlayerRandomFit();
             }
         });
+        add(new PylosPlayerType("officialbot") {
+            @Override
+            public PylosPlayer create(){return new StudentPlayerOfficial();}
+        });
     }
 }

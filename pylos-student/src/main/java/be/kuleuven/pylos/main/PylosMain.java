@@ -13,6 +13,7 @@ import be.kuleuven.pylos.player.PylosPlayerType;
 import be.kuleuven.pylos.player.codes.PlayerFactoryCodes;
 import be.kuleuven.pylos.player.codes.PylosPlayerBestFit;
 import be.kuleuven.pylos.player.codes.PylosPlayerMiniMax;
+import be.kuleuven.pylos.player.student.StudentPlayerOfficial;
 
 import java.util.List;
 import java.util.Random;
@@ -25,9 +26,9 @@ public class PylosMain {
         /* !!! jvm argument !!! -ea */
 
         //startSingleGame();
-        //startBattle();
+        startBattle();
         //startBattleMultithreaded();
-        startRoundRobinTournament();
+        //startRoundRobinTournament();
     }
 
     public static void startSingleGame() {
@@ -44,18 +45,18 @@ public class PylosMain {
     }
 
     public static void startBattle() {
-        int nRuns = 100;
+        int nRuns = 300;
         PylosPlayerType p1 = new PylosPlayerType("BestFit") {
             @Override
             public PylosPlayer create() {
-                return new PylosPlayerBestFit();
+                return new PylosPlayerMiniMax(5);
             }
         };
 
-        PylosPlayerType p2 = new PylosPlayerType("Minimax2") {
+        PylosPlayerType p2 = new PylosPlayerType("wij") {
             @Override
             public PylosPlayer create() {
-                return new PylosPlayerMiniMax(2);
+                return new StudentPlayerOfficial();
             }
         };
 

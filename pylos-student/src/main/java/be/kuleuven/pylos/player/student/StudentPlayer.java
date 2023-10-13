@@ -9,7 +9,7 @@ import java.util.ArrayList;
  * Created by Jan on 20/02/2015.
  */
 public class StudentPlayer extends PylosPlayer {
-	private static final int MAX_DEPTH = 6;
+	private static final int MAX_DEPTH = 7;
 
 	@Override
 	public void doRemove(PylosGameIF game, PylosBoard board) {
@@ -139,7 +139,10 @@ public class StudentPlayer extends PylosPlayer {
 		int centerScoreOpponent = countCenters(playerColor.other(), board);
 		int centerScore = centerScorePlayer - centerScoreOpponent;
 
-		return reservesScore + squaresScore + centerScore;
+		// New factors to consider
+		int potentialSquareScore = countPotentialSquares(playerColor, board) - countPotentialSquares(playerColor.other(), board);
+
+		return reservesScore + squaresScore + centerScore + 2* potentialSquareScore;
 	}
 
 	private int countSquares(PylosPlayerColor playerColor, PylosBoard board) {
@@ -161,6 +164,16 @@ public class StudentPlayer extends PylosPlayer {
 		}
 		return count;
 	}
+	private int countPotentialSquares(PylosPlayerColor playerColor, PylosBoard board) {
+		int count = 0;
+		for (PylosSquare square : board.getAllSquares()) {
+			if (square.getInSquare(playerColor) == 3 && square.getInSquare() == 3) {
+				count++;
+			}
+		}
+		return count;
+	}
+
 
 	private boolean isCentered(PylosSphere sphere, PylosBoard board) {
 		if (!sphere.isReserve()) {
@@ -197,15 +210,3 @@ public class StudentPlayer extends PylosPlayer {
 		}
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-

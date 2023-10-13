@@ -102,6 +102,7 @@ public class PylosGameSimulator {
         reset(prevState, prevColor);
     }
 
+
     public void undoRemoveSecondSphere(PylosSphere pylosSphere, PylosLocation prevLocation, PylosGameState prevState, PylosPlayerColor prevColor) {
         assert currentState == PylosGameState.MOVE;
         board.add(pylosSphere, prevLocation);
