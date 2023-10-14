@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class StudentPlayerJonas extends PylosPlayer {
-    final int MAX_DEPTH = 9;
+    final int MAX_DEPTH = 8;
     final BoardEvaluator evaluator = new BoardEvaluator();
     boolean isFirstMove = true;
     final TranspositionTable transpositionTable = new TranspositionTable();
