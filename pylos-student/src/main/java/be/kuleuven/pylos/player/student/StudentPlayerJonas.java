@@ -7,15 +7,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class StudentPlayerJonas extends PylosPlayer {
-    final int MAX_DEPTH = 8;
+    final int MAX_DEPTH = 9;
     final BoardEvaluator evaluator = new BoardEvaluator();
     boolean isFirstMove = true;
-    final TranspositionTable transpositionTable;
-
-    public StudentPlayerJonas() {
-        super();
-        this.transpositionTable = new TranspositionTable(this.PLAYER_COLOR);
-    }
+    final TranspositionTable transpositionTable = new TranspositionTable();
 
     @Override
     public void doMove(PylosGameIF game, PylosBoard board) {
@@ -24,8 +19,9 @@ public class StudentPlayerJonas extends PylosPlayer {
             bestMove = doFirstMove(board);
             isFirstMove = false;
         } else {
-            Move firstMove = new Move();
-            bestMove = minimax(game.getState(), board, firstMove, this.PLAYER_COLOR, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            this.transpositionTable.setPlayerColor(this.PLAYER_COLOR);
+            Move root = new Move();
+            bestMove = minimax(game.getState(), board, root, this.PLAYER_COLOR, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE);
         }
 
         assert bestMove != null;
@@ -36,8 +32,10 @@ public class StudentPlayerJonas extends PylosPlayer {
 
     @Override
     public void doRemove(PylosGameIF game, PylosBoard board) {
-        Move firstMove = new Move();
-        Move bestMove = minimax(game.getState(), board, firstMove, this.PLAYER_COLOR, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        this.transpositionTable.setPlayerColor(this.PLAYER_COLOR);
+
+        Move root = new Move();
+        Move bestMove = minimax(game.getState(), board, root, this.PLAYER_COLOR, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE);
 
         assert bestMove != null;
         PylosSphere bestSphere = bestMove.getSphere();
@@ -46,8 +44,10 @@ public class StudentPlayerJonas extends PylosPlayer {
 
     @Override
     public void doRemoveOrPass(PylosGameIF game, PylosBoard board) {
-        Move firstMove = new Move();
-        Move bestMove = minimax(game.getState(), board, firstMove, this.PLAYER_COLOR, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        this.transpositionTable.setPlayerColor(this.PLAYER_COLOR);
+
+        Move root = new Move();
+        Move bestMove = minimax(game.getState(), board, root, this.PLAYER_COLOR, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE);
 
         assert bestMove != null;
         if (bestMove.getMoveType() == MoveType.PASS) {
@@ -252,9 +252,9 @@ class BoardEvaluator {
 class TranspositionTable {
     private final HashMap<Long, Integer> ownTranspositionTable = new HashMap<>();
     private final HashMap<Long, Integer> otherTranspositionTable = new HashMap<>();
-    private final PylosPlayerColor playerColor;
+    private PylosPlayerColor playerColor;
 
-    public TranspositionTable(PylosPlayerColor playerColor) {
+    public void setPlayerColor(PylosPlayerColor playerColor) {
         this.playerColor = playerColor;
     }
 

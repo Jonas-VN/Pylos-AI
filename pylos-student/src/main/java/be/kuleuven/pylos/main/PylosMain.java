@@ -29,8 +29,8 @@ public class PylosMain {
         /* !!! jvm argument !!! -ea */
 
         //startSingleGame();
-        //startBattle();
-        startBattleMultithreaded();
+        startBattle();
+        //startBattleMultithreaded();
         //startRoundRobinTournament();
     }
 

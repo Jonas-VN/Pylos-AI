@@ -31,12 +31,12 @@ public class PlayerFactoryStudent extends PylosPlayerFactory {
             }
         });
 
-        add(new PylosPlayerType("officialbot") {
-            @Override
-            public PylosPlayer create(){
-                return new StudentPlayerOfficial();
-            }
-        });
+//        add(new PylosPlayerType("officialbot") {
+//            @Override
+//            public PylosPlayer create(){
+//                return new StudentPlayerOfficial();
+//            }
+//        });
 
         add(new PylosPlayerType("Jonas") {
             @Override

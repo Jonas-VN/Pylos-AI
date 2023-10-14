@@ -1,4 +1,4 @@
-package be.kuleuven.pylos.player.student;
+/*package be.kuleuven.pylos.player.student;
 
 import be.kuleuven.pylos.game.*;
 import be.kuleuven.pylos.player.PylosPlayer;
@@ -209,7 +209,7 @@ class BoardEvaluator {
                 //this.evaluateHigherZLevels(board, playerColor)
         );
     }
-    /*
+    *//*
     private int evaluateHigherZLevels(PylosBoard board, PylosPlayerColor playerColor) {
         int own_score = 0;
         int other_score = 0;
@@ -234,7 +234,7 @@ class BoardEvaluator {
     }
 
 
-     */
+     *//*
     private int evaluateReserveSpheres(PylosBoard board, PylosPlayerColor playerColor) {
         return (
                 board.getReservesSize(playerColor) * OWN_WEIGHT -
@@ -392,4 +392,4 @@ enum MoveType {
     REMOVE_FIRST,
     REMOVE_SECOND,
     PASS
-}
+}*/
