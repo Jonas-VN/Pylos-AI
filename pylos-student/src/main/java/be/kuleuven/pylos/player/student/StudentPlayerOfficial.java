@@ -165,7 +165,7 @@ public class StudentPlayerOfficial extends PylosPlayer {
     }
 
 }
-    class StudentPlayerGameSimulator extends PylosGameSimulator {
+class StudentPlayerGameSimulator extends PylosGameSimulator {
     public StudentPlayerGameSimulator(PylosGameState gameState, PylosPlayerColor playerColor, PylosBoard board) {
         super(gameState, playerColor, board);
     }
@@ -206,7 +206,7 @@ class BoardEvaluator {
         return (
                 this.evaluateReserveSpheres(board, playerColor) +
                         this.evaluateSquares(board, playerColor)// +
-                        //this.evaluateHigherZLevels(board, playerColor)
+                //this.evaluateHigherZLevels(board, playerColor)
         );
     }
     /*
