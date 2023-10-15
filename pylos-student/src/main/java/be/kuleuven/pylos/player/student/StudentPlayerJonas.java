@@ -54,20 +54,16 @@ public class StudentPlayerJonas extends PylosPlayer {
 
     private Move doFirstMove(PylosBoard board) {
         final int z = 0;
-        final int[] Y = {1, 2};
-        final int[] X = {1, 2};
-
-        for (final int x : X) {
-            for (final int y : Y) {
-                PylosLocation location = board.getBoardLocation(x, y, z);
-                PylosSphere sphere = board.getReserve(this.PLAYER_COLOR);
-                if (sphere.canMoveTo(location)) {
-                    return new Move(MoveType.ADD, sphere, sphere.getLocation(), location, this.PLAYER_COLOR);
-                }
+        while (true) {
+            // Introduce a little bit of randomness
+            int x = this.getRandom().nextInt(2) + 1;
+            int y = this.getRandom().nextInt(2) + 1;
+            PylosLocation location = board.getBoardLocation(x, y, z);
+            PylosSphere sphere = board.getReserve(this.PLAYER_COLOR);
+            if (sphere.canMoveTo(location)) {
+                return new Move(MoveType.ADD, sphere, sphere.getLocation(), location, this.PLAYER_COLOR);
             }
         }
-        // Should never happen
-        return null;
     }
 
     private Move minimax(PylosGameState gameState, PylosBoard board, Move latestMove, PylosPlayerColor playerColor, int depth, int alpha, int beta, boolean doLMRReduction) {
