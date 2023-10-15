@@ -73,7 +73,7 @@ public class PylosMain {
         //as this is not ideal for use across multiple threads.
         //Use Collections.shuffle(List<?> list, Random random) instead, with the Random object from the player (PylosPlayer.getRandom())
 
-        int nRuns = 500;
+        int nRuns = 1000;
         int nThreads = 6;
 
         final int depth = 4;
