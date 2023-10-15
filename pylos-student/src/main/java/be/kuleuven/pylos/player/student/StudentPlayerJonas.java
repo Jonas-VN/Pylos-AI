@@ -4,13 +4,11 @@ import be.kuleuven.pylos.game.*;
 import be.kuleuven.pylos.player.PylosPlayer;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class StudentPlayerJonas extends PylosPlayer {
     final int MAX_DEPTH = 8;
     final BoardEvaluator evaluator = new BoardEvaluator();
     boolean isFirstMove = true;
-    final TranspositionTable transpositionTable = new TranspositionTable();
 
     @Override
     public void doMove(PylosGameIF game, PylosBoard board) {
@@ -19,10 +17,10 @@ public class StudentPlayerJonas extends PylosPlayer {
             bestMove = doFirstMove(board);
             isFirstMove = false;
         } else {
-            this.transpositionTable.setPlayerColor(this.PLAYER_COLOR);
             Move root = new Move();
             bestMove = minimax(game.getState(), board, root, this.PLAYER_COLOR, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE);
         }
+
 
         assert bestMove != null;
         PylosSphere bestSphere = bestMove.getSphere();
@@ -32,8 +30,6 @@ public class StudentPlayerJonas extends PylosPlayer {
 
     @Override
     public void doRemove(PylosGameIF game, PylosBoard board) {
-        this.transpositionTable.setPlayerColor(this.PLAYER_COLOR);
-
         Move root = new Move();
         Move bestMove = minimax(game.getState(), board, root, this.PLAYER_COLOR, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE);
 
@@ -44,8 +40,6 @@ public class StudentPlayerJonas extends PylosPlayer {
 
     @Override
     public void doRemoveOrPass(PylosGameIF game, PylosBoard board) {
-        this.transpositionTable.setPlayerColor(this.PLAYER_COLOR);
-
         Move root = new Move();
         Move bestMove = minimax(game.getState(), board, root, this.PLAYER_COLOR, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE);
 
@@ -80,27 +74,7 @@ public class StudentPlayerJonas extends PylosPlayer {
         // Recursion base case
         if (depth <= 0 || gameState == PylosGameState.COMPLETED) {
             latestMove.setEvaluationScore(evaluator.evaluateBoard(board, this.PLAYER_COLOR));
-
-            // Update transposition table
-            this.transpositionTable.put(board, latestMove.getEvaluationScore(), playerColor);
             return latestMove;
-        }
-
-        // Look in transposition table
-        int evaluationScore;
-        if (this.PLAYER_COLOR == playerColor && this.transpositionTable.containsKey(board, playerColor)) {
-            evaluationScore = this.transpositionTable.get(board, playerColor);
-            if (evaluationScore > beta) {
-                latestMove.setEvaluationScore(evaluationScore);
-                return latestMove;
-            }
-        }
-        else if (this.PLAYER_COLOR.other() == playerColor && this.transpositionTable.containsKey(board, playerColor)) {
-            evaluationScore = this.transpositionTable.get(board, playerColor);
-            if (evaluationScore < alpha) {
-                latestMove.setEvaluationScore(evaluationScore);
-                return latestMove;
-            }
         }
 
         StudentPlayerGameSimulator simulator = new StudentPlayerGameSimulator(gameState, playerColor, board);
@@ -114,12 +88,11 @@ public class StudentPlayerJonas extends PylosPlayer {
             for (final Move move : latestMove.getChildren()) {
                 simulator.doMove(move);
                 Move nextBestMove = minimax(simulator.getState(), board, move, simulator.getColor(), depth - 1, alpha, beta);
+                simulator.undoMove(move);
 
                 // Beta cut-off
                 if (nextBestMove.getEvaluationScore() > beta) {
                     move.setEvaluationScore(beta);
-                    this.transpositionTable.put(board, move.getEvaluationScore(), playerColor);
-                    simulator.undoMove(move);
                     return move;
                 }
 
@@ -127,8 +100,6 @@ public class StudentPlayerJonas extends PylosPlayer {
                 alpha = Math.max(alpha, nextBestMove.getEvaluationScore());
                 if (beta <= alpha) {
                     move.setEvaluationScore(nextBestMove.getEvaluationScore());
-                    this.transpositionTable.put(board, move.getEvaluationScore(), playerColor);
-                    simulator.undoMove(move);
                     return move;
                 }
 
@@ -138,22 +109,19 @@ public class StudentPlayerJonas extends PylosPlayer {
                     currentBestMove = move;
                     currentBestMove.setEvaluationScore(bestEvaluationScore);
                 }
-                simulator.undoMove(move);
             }
-        }
-        else {
+        } else {
             // Minimize
             int bestEvaluationScore = Integer.MAX_VALUE;
 
             for (final Move move : latestMove.getChildren()) {
                 simulator.doMove(move);
                 Move nextBestMove = minimax(simulator.getState(), board, move, simulator.getColor(), depth - 1, alpha, beta);
+                simulator.undoMove(move);
 
                 // Alpha cut-off
                 if (nextBestMove.getEvaluationScore() < alpha) {
                     move.setEvaluationScore(alpha);
-                    this.transpositionTable.put(board, move.getEvaluationScore(), playerColor);
-                    simulator.undoMove(move);
                     return move;
                 }
 
@@ -161,8 +129,6 @@ public class StudentPlayerJonas extends PylosPlayer {
                 beta = Math.min(beta, nextBestMove.getEvaluationScore());
                 if (beta <= alpha) {
                     move.setEvaluationScore(nextBestMove.getEvaluationScore());
-                    this.transpositionTable.put(board, move.getEvaluationScore(), playerColor);
-                    simulator.undoMove(move);
                     return move;
                 }
 
@@ -172,7 +138,6 @@ public class StudentPlayerJonas extends PylosPlayer {
                     currentBestMove = move;
                     currentBestMove.setEvaluationScore(bestEvaluationScore);
                 }
-                simulator.undoMove(move);
             }
         }
         return currentBestMove;
@@ -249,46 +214,6 @@ class BoardEvaluator {
     }
 }
 
-class TranspositionTable {
-    private final HashMap<Long, Integer> ownTranspositionTable = new HashMap<>();
-    private final HashMap<Long, Integer> otherTranspositionTable = new HashMap<>();
-    private PylosPlayerColor playerColor;
-
-    public void setPlayerColor(PylosPlayerColor playerColor) {
-        this.playerColor = playerColor;
-    }
-
-    public void put(PylosBoard board, int evaluationScore, PylosPlayerColor currentPlayerColor) {
-        Long boardHash = board.toLong();
-        if (this.playerColor == currentPlayerColor) {
-            ownTranspositionTable.put(boardHash, evaluationScore);
-        } else {
-            otherTranspositionTable.put(boardHash, evaluationScore);
-        }
-    }
-
-    public boolean containsKey(PylosBoard board, PylosPlayerColor currentPlayerColor) {
-        Long boardHash = board.toLong();
-        if (this.playerColor == currentPlayerColor) {
-            return ownTranspositionTable.containsKey(boardHash);
-        }
-        else {
-            return otherTranspositionTable.containsKey(boardHash);
-        }
-    }
-
-    public Integer get(PylosBoard board, PylosPlayerColor currentPlayerColor) {
-        Long boardHash = board.toLong();
-        if (this.playerColor == currentPlayerColor) {
-            return ownTranspositionTable.get(boardHash);
-        }
-        else if (this.playerColor.other() == currentPlayerColor) {
-            return otherTranspositionTable.get(boardHash);
-        }
-        return null;
-    }
-}
-
 class Move {
     private final MoveType moveType;
     private final PylosSphere sphere;
@@ -318,31 +243,31 @@ class Move {
     }
 
     public MoveType getMoveType() {
-        return moveType;
+        return this.moveType;
     }
 
     public PylosSphere getSphere() {
-        return sphere;
+        return this.sphere;
     }
 
     public PylosLocation getStartLocation() {
-        return startLocation;
+        return this.startLocation;
     }
 
     public PylosLocation getEndLocation() {
-        return endLocation;
+        return this.endLocation;
     }
 
     public PylosPlayerColor getPlayerColor() {
-        return playerColor;
+        return this.playerColor;
     }
 
     public int getEvaluationScore() {
-        return evaluationScore;
+        return this.evaluationScore;
     }
 
     public ArrayList<Move> getChildren() {
-        return children;
+        return this.children;
     }
 
     public void setEvaluationScore(int evaluationScore) {
@@ -350,7 +275,7 @@ class Move {
     }
 
     public void addChild(Move child) {
-        children.add(child);
+        this.children.add(child);
     }
 
     public void generateAllLegalMoves(PylosGameState gameState, PylosPlayerColor playerColor, PylosBoard board) {
