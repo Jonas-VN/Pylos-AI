@@ -242,7 +242,7 @@ class Move {
         this.playerColor = null;
     }
 
-    public void initChildern() {
+    public void initChildren() {
         this.children = new ArrayList<>();
     }
 
@@ -283,7 +283,7 @@ class Move {
     }
 
     public void generateAllLegalMoves(PylosGameState gameState, PylosPlayerColor playerColor, PylosBoard board) {
-        this.initChildern();
+        this.initChildren();
         switch (gameState) {
             case MOVE -> this.generateAllLegalMovesMove(playerColor, board);
             case REMOVE_FIRST -> this.generateAllLegalMovesRemoveFirst(playerColor, board);
