@@ -13,10 +13,7 @@ import be.kuleuven.pylos.player.PylosPlayerType;
 import be.kuleuven.pylos.player.codes.PlayerFactoryCodes;
 import be.kuleuven.pylos.player.codes.PylosPlayerBestFit;
 import be.kuleuven.pylos.player.codes.PylosPlayerMiniMax;
-import be.kuleuven.pylos.player.codes.PylosPlayerRandomFit;
-import be.kuleuven.pylos.player.student.StudentPlayer;
 import be.kuleuven.pylos.player.student.StudentPlayerJonas;
-import be.kuleuven.pylos.player.student.StudentPlayerRandomFit;
 
 import java.util.List;
 import java.util.Random;
@@ -51,7 +48,7 @@ public class PylosMain {
         int nRuns = 100;
 
         final int depth = 4;
-        PylosPlayerType p1 = new PylosPlayerType("Minimax " + depth) {
+        PylosPlayerType p1 = new PylosPlayerType("CODES " + depth) {
             @Override
             public PylosPlayer create() {
                 return new PylosPlayerMiniMax(depth);
