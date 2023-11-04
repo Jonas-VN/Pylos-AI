@@ -13,7 +13,7 @@ import be.kuleuven.pylos.player.PylosPlayerType;
 import be.kuleuven.pylos.player.codes.PlayerFactoryCodes;
 import be.kuleuven.pylos.player.codes.PylosPlayerBestFit;
 import be.kuleuven.pylos.player.codes.PylosPlayerMiniMax;
-import be.kuleuven.pylos.player.student.StudentPlayerJonas;
+import be.kuleuven.pylos.player.student.StudentPlayerGilEnJonas;
 
 import java.util.List;
 import java.util.Random;
@@ -58,7 +58,7 @@ public class PylosMain {
         PylosPlayerType p2 = new PylosPlayerType("Wij") {
             @Override
             public PylosPlayer create() {
-                return new StudentPlayerJonas();
+                return new StudentPlayerGilEnJonas();
             }
         };
 
@@ -84,7 +84,7 @@ public class PylosMain {
         PylosPlayerType p2 = new PylosPlayerType("Wij") {
             @Override
             public PylosPlayer create() {
-                return new StudentPlayerJonas();
+                return new StudentPlayerGilEnJonas();
             }
         };
 

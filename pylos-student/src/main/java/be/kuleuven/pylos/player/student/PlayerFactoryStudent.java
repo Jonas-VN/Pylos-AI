@@ -38,10 +38,10 @@ public class PlayerFactoryStudent extends PylosPlayerFactory {
 //            }
 //        });
 
-        add(new PylosPlayerType("Jonas") {
+        add(new PylosPlayerType("Wij") {
             @Override
             public PylosPlayer create() {
-                return new StudentPlayerJonas();
+                return new StudentPlayerGilEnJonas();
             }
         });
     }
