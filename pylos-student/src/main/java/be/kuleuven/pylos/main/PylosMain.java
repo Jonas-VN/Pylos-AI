@@ -45,7 +45,7 @@ public class PylosMain {
     }
 
     public static void startBattle() {
-        int nRuns = 100;
+        int nRuns = 1000;
 
         final int depth = 4;
         PylosPlayerType p1 = new PylosPlayerType("CODES " + depth) {

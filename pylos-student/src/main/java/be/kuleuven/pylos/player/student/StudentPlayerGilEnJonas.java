@@ -17,7 +17,8 @@ public class StudentPlayerGilEnJonas extends PylosPlayer {
         }
         if (bestMove == null) {
             Move root = new Move();
-            bestMove = minimax(game.getState(), board, root, this.PLAYER_COLOR, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
+            StudentPlayerGameSimulator simulator = new StudentPlayerGameSimulator(game.getState(), this.PLAYER_COLOR, board);
+            bestMove = minimax(simulator, board, root, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
         }
 
         assert bestMove != null;
@@ -29,7 +30,8 @@ public class StudentPlayerGilEnJonas extends PylosPlayer {
     @Override
     public void doRemove(PylosGameIF game, PylosBoard board) {
         Move root = new Move();
-        Move bestMove = minimax(game.getState(), board, root, this.PLAYER_COLOR, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
+        StudentPlayerGameSimulator simulator = new StudentPlayerGameSimulator(game.getState(), this.PLAYER_COLOR, board);
+        Move bestMove = minimax(simulator, board, root, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
 
         assert bestMove != null;
         PylosSphere bestSphere = bestMove.getSphere();
@@ -39,7 +41,8 @@ public class StudentPlayerGilEnJonas extends PylosPlayer {
     @Override
     public void doRemoveOrPass(PylosGameIF game, PylosBoard board) {
         Move root = new Move();
-        Move bestMove = minimax(game.getState(), board, root, this.PLAYER_COLOR, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
+        StudentPlayerGameSimulator simulator = new StudentPlayerGameSimulator(game.getState(), this.PLAYER_COLOR, board);
+        Move bestMove = minimax(simulator, board, root, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
 
         assert bestMove != null;
         if (bestMove.getMoveType() == MoveType.PASS) {
@@ -65,85 +68,83 @@ public class StudentPlayerGilEnJonas extends PylosPlayer {
         return null;
     }
 
-    private Move minimax(PylosGameState gameState, PylosBoard board, Move latestMove, PylosPlayerColor playerColor, int depth, int alpha, int beta, boolean doLMRReduction) {
+    private Move minimax(StudentPlayerGameSimulator simulator, PylosBoard board, Move parent, int depth, int alpha, int beta, boolean doLMRReduction) {
         // Recursion base case
-        if (depth <= 0 || gameState == PylosGameState.COMPLETED) {
-            latestMove.setEvaluationScore(evaluator.evaluateBoard(board, this.PLAYER_COLOR));
-            return latestMove;
+        if (depth <= 0 || simulator.getState() == PylosGameState.COMPLETED) {
+            parent.setEvaluationScore(evaluator.evaluateBoard(board, this.PLAYER_COLOR));
+            return parent;
         }
 
-        StudentPlayerGameSimulator simulator = new StudentPlayerGameSimulator(gameState, playerColor, board);
-        latestMove.generateAllLegalMoves(gameState, playerColor, board);
-        Move currentBestMove = null;
+        parent.generateAllLegalMoves(simulator.getState(), simulator.getColor(), board);
+        Move bestMove = new Move();
 
-        if (playerColor == this.PLAYER_COLOR) {
+        if (simulator.getColor() == this.PLAYER_COLOR) {
             // Maximize
-            int bestEvaluationScore = Integer.MIN_VALUE;
+            bestMove.setEvaluationScore(Integer.MIN_VALUE);
 
-            for (final Move move : latestMove.getChildren()) {
-                simulator.doMove(move);
-                Move nextBestMove = evaluateMove(move, simulator, board, depth, alpha, beta, doLMRReduction);
-                simulator.undoMove(move);
+            for (final Move child : parent.getChildren()) {
+                simulator.doMove(child);
+                Move nextBestMove = evaluateMove(simulator, board, child, depth, alpha, beta, doLMRReduction);
+                simulator.undoMove(child);
 
                 // Beta cut-off
                 if (nextBestMove.getEvaluationScore() > beta) {
-                    move.setEvaluationScore(beta);
-                    return move;
+                    child.setEvaluationScore(beta);
+                    return child;
                 }
 
                 // Alpha beta pruning
                 alpha = Math.max(alpha, nextBestMove.getEvaluationScore());
                 if (beta <= alpha) {
-                    move.setEvaluationScore(nextBestMove.getEvaluationScore());
-                    return move;
+                    child.setEvaluationScore(nextBestMove.getEvaluationScore());
+                    return child;
                 }
 
                 // Update best move
-                if (bestEvaluationScore < nextBestMove.getEvaluationScore()) {
-                    bestEvaluationScore = nextBestMove.getEvaluationScore();
-                    currentBestMove = move;
-                    currentBestMove.setEvaluationScore(bestEvaluationScore);
+                if (bestMove.getEvaluationScore() < nextBestMove.getEvaluationScore()) {
+                    bestMove = child;
+                    bestMove.setEvaluationScore(nextBestMove.getEvaluationScore());
                 }
             }
-        } else {
+        }
+        else {
             // Minimize
-            int bestEvaluationScore = Integer.MAX_VALUE;
+            bestMove.setEvaluationScore(Integer.MAX_VALUE);
 
-            for (final Move move : latestMove.getChildren()) {
-                simulator.doMove(move);
-                Move nextBestMove = evaluateMove(move, simulator, board, depth, alpha, beta, doLMRReduction);
-                simulator.undoMove(move);
+            for (final Move child : parent.getChildren()) {
+                simulator.doMove(child);
+                Move nextBestMove = evaluateMove(simulator, board, child, depth, alpha, beta, doLMRReduction);
+                simulator.undoMove(child);
 
                 // Alpha cut-off
                 if (nextBestMove.getEvaluationScore() < alpha) {
-                    move.setEvaluationScore(alpha);
-                    return move;
+                    child.setEvaluationScore(alpha);
+                    return child;
                 }
 
                 // Alpha beta pruning
                 beta = Math.min(beta, nextBestMove.getEvaluationScore());
                 if (beta <= alpha) {
-                    move.setEvaluationScore(nextBestMove.getEvaluationScore());
-                    return move;
+                    child.setEvaluationScore(nextBestMove.getEvaluationScore());
+                    return child;
                 }
 
                 // Update best move
-                if (bestEvaluationScore > nextBestMove.getEvaluationScore()) {
-                    bestEvaluationScore = nextBestMove.getEvaluationScore();
-                    currentBestMove = move;
-                    currentBestMove.setEvaluationScore(bestEvaluationScore);
+                if (bestMove.getEvaluationScore() > nextBestMove.getEvaluationScore()) {
+                    bestMove = child;
+                    bestMove.setEvaluationScore(nextBestMove.getEvaluationScore());
                 }
             }
         }
-        return currentBestMove;
+        return bestMove;
     }
 
-    private Move evaluateMove(Move move, StudentPlayerGameSimulator simulator, PylosBoard board, int depth, int alpha, int beta, boolean doLMRReduction) {
+    private Move evaluateMove(StudentPlayerGameSimulator simulator, PylosBoard board, Move move, int depth, int alpha, int beta, boolean doLMRReduction) {
         if (doLMRReduction && move.getMoveType() == MoveType.ADD) {
-            return minimax(simulator.getState(), board, move, simulator.getColor(), depth - 2, alpha, beta, false);
+            return minimax(simulator, board, move, depth - 2, alpha, beta, false);
         }
         else {
-            return minimax(simulator.getState(), board, move, simulator.getColor(), depth - 1, alpha, beta, true);
+            return minimax(simulator, board, move, depth - 1, alpha, beta, true);
         }
     }
 }
