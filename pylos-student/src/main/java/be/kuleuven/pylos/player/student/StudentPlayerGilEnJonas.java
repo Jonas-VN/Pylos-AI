@@ -88,17 +88,11 @@ public class StudentPlayerGilEnJonas extends PylosPlayer {
                 simulator.undoMove(child);
 
                 // Beta cut-off
-                if (nextBestMove.getEvaluationScore() > beta) {
+                if (nextBestMove.getEvaluationScore() >= beta) {
                     child.setEvaluationScore(beta);
                     return child;
                 }
-
-                // Alpha beta pruning
                 alpha = Math.max(alpha, nextBestMove.getEvaluationScore());
-                if (beta <= alpha) {
-                    child.setEvaluationScore(nextBestMove.getEvaluationScore());
-                    return child;
-                }
 
                 // Update best move
                 if (bestMove.getEvaluationScore() < nextBestMove.getEvaluationScore()) {
@@ -117,17 +111,11 @@ public class StudentPlayerGilEnJonas extends PylosPlayer {
                 simulator.undoMove(child);
 
                 // Alpha cut-off
-                if (nextBestMove.getEvaluationScore() < alpha) {
+                if (nextBestMove.getEvaluationScore() <= alpha) {
                     child.setEvaluationScore(alpha);
                     return child;
                 }
-
-                // Alpha beta pruning
                 beta = Math.min(beta, nextBestMove.getEvaluationScore());
-                if (beta <= alpha) {
-                    child.setEvaluationScore(nextBestMove.getEvaluationScore());
-                    return child;
-                }
 
                 // Update best move
                 if (bestMove.getEvaluationScore() > nextBestMove.getEvaluationScore()) {
